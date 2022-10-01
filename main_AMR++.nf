@@ -37,6 +37,8 @@ include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
 include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf' 
 include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
+include { FASTQ_QIIME2_WF } from './subworkflows/fastq_16S_qiime2.nf'
+
 
 
 workflow {
@@ -76,7 +78,19 @@ workflow {
     else if(params.pipeline == "kraken") {
 
         FASTQ_KRAKEN_WF( fastq_files , params.kraken_db)
-    }   
+    }
+    else if(params.pipeline == "qiime2") {
+
+        reads
+            .map { name, forward, reverse -> [ forward.drop(forward.findLastIndexOf{"/"})[0], forward, reverse ] } //extract file name
+            .map { name, forward, reverse -> [ name.toString().take(name.toString().indexOf("_")), forward, reverse ] } //extract sample name
+            .map { name, forward, reverse -> [ name +"\t"+ forward + "\t" + reverse ] } //prepare basic synthax
+            .flatten()
+            .collectFile(name: 'manifest.tsv', newLine: true, storeDir: "${params.output}/demux", seed: "sample-id\tforward-absolute-filepath\treverse-absolute-filepath")
+            .set { ch_manifest }  
+
+        FASTQ_QIIME2_WF( ch_manifest , params.dada2_db)
+    }
     else {
             println "ERROR ################################################################"
             println "Please choose a pipeline!!!" 
