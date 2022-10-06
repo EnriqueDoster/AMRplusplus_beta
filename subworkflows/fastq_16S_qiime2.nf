@@ -1,14 +1,19 @@
 
 // resistome
-include { Qiime2Processing} from '../modules/Microbiome/qiime2'
+include { Qiime2Import  ; Qiime2Dada2 ; Qiime2Classify ; Qiime2Filter ; Qiime2Tree ; Qiime2Export } from '../modules/Microbiome/qiime2'
 
 
 workflow FASTQ_QIIME2_WF {
     take: 
-        ch_manifest
-        dada2_db
+        manifest
+        database
         
     main:
-        Qiime2Processing(ch_manifest,dada2_db)        
+        Qiime2Import(manifest)
+        Qiime2Dada2(Qiime2Import.out.demux)
+        Qiime2Classify(Qiime2Dada2.out.rep_seqs, database)
+        Qiime2Filter(Qiime2Dada2.out.rep_seqs, Qiime2Classify.out.taxonomy , Qiime2Dada2.out.rep_seqs)
+        Qiime2Tree(Qiime2Filter.out.filtered_seqs)
+        Qiime2Export(Qiime2Filter.out.filtered_seqs, Qiime2Tree.out.rooted_tree, Qiime2Filter.out.filtered_table, Qiime2Classify.out.taxonomy )
 
 }

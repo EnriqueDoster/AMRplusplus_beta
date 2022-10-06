@@ -25,6 +25,7 @@ Channel
 params.pipeline = null
 
 
+
 // Load main pipeline workflows
 
 include { STANDARD_AMRplusplus } from './subworkflows/AMR++_standard.nf' 
@@ -80,15 +81,16 @@ workflow {
         FASTQ_KRAKEN_WF( fastq_files , params.kraken_db)
     }
     else if(params.pipeline == "qiime2") {
-
-        reads
+        Channel
+            .fromFilePairs( params.reads, flat: true )
+            .ifEmpty { exit 1, "Read pair files could not be found: ${params.reads}" }
             .map { name, forward, reverse -> [ forward.drop(forward.findLastIndexOf{"/"})[0], forward, reverse ] } //extract file name
             .map { name, forward, reverse -> [ name.toString().take(name.toString().indexOf("_")), forward, reverse ] } //extract sample name
-            .map { name, forward, reverse -> [ name +"\t"+ forward + "\t" + reverse ] } //prepare basic synthax
+            .map { name, forward, reverse -> [ name +","+ forward + ",forward\n" + name +","+ reverse +",reverse" ] } //prepare basic synthax
             .flatten()
-            .collectFile(name: 'manifest.tsv', newLine: true, storeDir: "${params.output}/demux", seed: "sample-id\tforward-absolute-filepath\treverse-absolute-filepath")
-            .set { ch_manifest }  
-
+            .collectFile(name: 'manifest.txt', newLine: true, storeDir: "${params.output}/demux", seed: "sample-id,absolute-filepath,direction")
+            .set { ch_manifest }
+        
         FASTQ_QIIME2_WF( ch_manifest , params.dada2_db)
     }
     else {
