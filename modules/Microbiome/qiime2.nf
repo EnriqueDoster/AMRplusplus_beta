@@ -7,8 +7,7 @@ EXTRAPARS = params.EXTRAPARS
 
 process Qiime2Import {
     tag { }
-    /*conda = "$baseDir/envs/qiime2.yaml" */
-    container = 'enriquedoster/qiime2:latest'
+
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -31,8 +30,7 @@ process Qiime2Import {
 
 process Qiime2Dada2 {
     tag { }
-    /*conda = "$baseDir/envs/qiime2.yaml" */
-    container = 'enriquedoster/qiime2:latest'
+
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -53,8 +51,7 @@ process Qiime2Dada2 {
 
 process Qiime2Classify {
     tag { }
-    /*conda = "$baseDir/envs/qiime2.yaml" */
-    container = 'enriquedoster/qiime2:latest'
+
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -72,8 +69,7 @@ process Qiime2Classify {
 
 process Qiime2Filter {
     tag { }
-    /*conda = "$baseDir/envs/qiime2.yaml" */
-    container = 'enriquedoster/qiime2:latest'
+
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -95,8 +91,7 @@ process Qiime2Filter {
 
 process Qiime2Tree {
     tag { }
-    /*conda = "$baseDir/envs/qiime2.yaml" */
-    container = 'enriquedoster/qiime2:latest'
+
     publishDir "${params.output}/Qiime2Results/Tree", mode: "copy"
 
     input:
@@ -118,8 +113,7 @@ process Qiime2Tree {
 
 process Qiime2Export {
     tag { }
-    /*conda = "$baseDir/envs/qiime2.yaml" */
-    container = 'enriquedoster/qiime2:latest'
+
     publishDir "${params.output}/Qiime2Results/Exported", mode: "copy"
 
     input:

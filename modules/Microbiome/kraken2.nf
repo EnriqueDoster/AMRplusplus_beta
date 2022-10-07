@@ -3,8 +3,6 @@ params.readlen = 150
 
 process runkraken {
     tag { sample_id }
-    conda = "$baseDir/envs/microbiome.yaml"
-    container = 'enriquedoster/amrplusplus_microbiome:latest'
 
     publishDir "${params.output}/RunKraken", mode: 'copy',
         saveAs: { filename ->
@@ -42,8 +40,6 @@ process runkraken {
 process krakenresults {
     tag { }
     conda = "$baseDir/envs/microbiome.yaml"
-    container = 'enriquedoster/amrplusplus_microbiome:latest'
-    publishDir "${params.output}/KrakenResults", mode: "copy"
 
     input:
         path(kraken_reports)

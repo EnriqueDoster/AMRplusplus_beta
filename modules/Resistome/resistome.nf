@@ -15,7 +15,6 @@ samples = params.samples
 process build_dependencies {
     tag { dl_github }
     publishDir "${baseDir}/bin/", mode: "copy"
-    conda = "$baseDir/envs/python.yaml"
 
     output:
         path("rarefaction"), emit: rarefactionanalyzer
@@ -57,8 +56,7 @@ process build_dependencies {
 
 process runresistome {
     tag { sample_id }
-    conda = "$baseDir/envs/alignment.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
+
     publishDir "${params.output}/RunResistome", mode: "copy"
 
     input:
@@ -88,8 +86,7 @@ process runresistome {
 
 process runsnp {
     tag { sample_id }
-    conda = "$baseDir/envs/python.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
+
     publishDir "${params.output}/RunSNP_Verification", mode: "copy"
 
     errorStrategy = 'ignore'
@@ -108,8 +105,7 @@ process runsnp {
 
 process resistomeresults {
     tag { }
-    conda = "$baseDir/envs/python.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
+
     publishDir "${params.output}/ResistomeResults", mode: "copy"
 
     input:
@@ -125,8 +121,7 @@ process resistomeresults {
 
 process runrarefaction {
     tag { sample_id }
-    conda = "$baseDir/envs/python.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
+
     publishDir "${params.output}/RunRarefaction", mode: "copy"
 
     input:
@@ -158,8 +153,7 @@ process runrarefaction {
 
 process plotrarefaction {
     tag { sample_id }
-    conda = "$baseDir/envs/python.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
+
     publishDir "${params.output}/RarefactionFigures", mode: "copy"
 
     input:

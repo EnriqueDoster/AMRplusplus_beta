@@ -17,8 +17,6 @@ threads = params.threads
 process index {
     //tag "$referenceindex.simpleName"
     publishDir "${params.output}/BuildBWAIndex", mode: "copy"
-    conda = "$baseDir/envs/alignment.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
 
     input:
     path fasta
@@ -37,9 +35,6 @@ process index {
 process bwa_align {
     tag "$pair_id"
     publishDir "${params.output}/AlignToDB", mode: "copy"
-
-    conda = "$baseDir/envs/alignment.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
 
     input:
     path dbfasta
@@ -70,9 +65,6 @@ process bwa_rm_contaminant_fq {
     tag { pair_id }
 
     publishDir "${params.output}/AlignReadsToHost", mode: "copy"
-
-    conda = "$baseDir/envs/alignment.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
 
     input:
     path hostfasta
