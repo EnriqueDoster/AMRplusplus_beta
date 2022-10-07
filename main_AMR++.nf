@@ -43,8 +43,11 @@ include { FASTQ_QIIME2_WF } from './subworkflows/fastq_16S_qiime2.nf'
 
 
 workflow {
-    if (params.pipeline == "demo") {
-
+    if (params.pipeline == null) {
+        log.info """\
+        Running a demonstration of AMR++
+        ===================================
+        """
         //run with demo params, use params.config
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
         
