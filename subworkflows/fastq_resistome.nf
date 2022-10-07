@@ -23,7 +23,9 @@ workflow FASTQ_RESISTOME_WF {
             // AMR alignment
             bwa_align(amr, index.out, read_pairs_ch )
             runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
-            runsnp(bwa_align.out.bwa_sam, amrsnp )
+            if (params.snp == "Y") {
+                runsnp(bwa_align.out.bwa_sam, amrsnp )
+           }
             resistomeresults(runresistome.out.resistome_counts.collect())
             runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
         }
@@ -36,7 +38,9 @@ workflow FASTQ_RESISTOME_WF {
             // AMR alignment
             bwa_align(amr, index.out, read_pairs_ch )
             runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
-            runsnp(bwa_align.out.bwa_sam, amrsnp )
+            if (params.snp == "Y") {
+                runsnp(bwa_align.out.bwa_sam, amrsnp )
+           }
             resistomeresults(runresistome.out.resistome_counts.collect())
             runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
         }
