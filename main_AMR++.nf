@@ -14,7 +14,6 @@ log.info """\
  ===================================
  reads        : ${params.reads}
  output       : ${params.output}
- pipeline     : ${params.pipeline}
  """
 
 Channel
@@ -24,8 +23,6 @@ Channel
 
 // Default is pipeline is null to warn users below
 params.pipeline = null
-
-
 
 // Load main pipeline workflows
 
