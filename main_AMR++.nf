@@ -14,6 +14,7 @@ log.info """\
  ===================================
  reads        : ${params.reads}
  output       : ${params.output}
+ pipeline     : ${params.pipeline}
  """
 
 Channel
@@ -63,15 +64,15 @@ workflow {
 
         STANDARD_AMRplusplus_wKraken(fastq_files,params.reference, params.amr, params.annotation, params.kraken_db)
     } 
-    else if(params.pipeline == "multiqc") {
+    else if(params.pipeline == "eval_qc") {
 
         FASTQ_QC_WF( fastq_files )
     } 
-    else if(params.pipeline == "trim") {
+    else if(params.pipeline == "trim_qc") {
 
         FASTQ_TRIM_WF( fastq_files )
     }
-    else if(params.pipeline == "rmhost") {
+    else if(params.pipeline == "rm_host") {
 
         FASTQ_RM_HOST_WF(params.host, fastq_files )
     } 
