@@ -24,11 +24,7 @@ process multiqc {
     errorStrategy 'ignore'
 
 
-    publishDir "${params.output}/multiQC", mode: 'copy',
-        saveAs: { filename ->
-            if(filename.indexOf(".html") > 0) "Stats/$filename"
-            else {}
-        }
+    publishDir "${params.output}/multiQC", mode: 'copy'
 
     
     input:

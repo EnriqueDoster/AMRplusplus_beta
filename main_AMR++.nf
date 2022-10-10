@@ -21,9 +21,6 @@ Channel
 .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
 .set { fastq_files }
 
-// Default is pipeline is null to warn users below
-params.pipeline = null
-
 // Load main pipeline workflows
 
 include { STANDARD_AMRplusplus } from './subworkflows/AMR++_standard.nf' 

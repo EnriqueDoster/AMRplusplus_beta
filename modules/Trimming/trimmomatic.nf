@@ -48,3 +48,20 @@ process runqc {
       
     """
 }
+
+process QCstats {
+    tag { sample_id }
+
+    publishDir "${params.output}/RunQC", mode: 'copy',
+        saveAs: { filename ->
+            if(filename.indexOf(".stats") > 0) "Stats/$filename"
+            else {}
+        }
+
+    input:
+        file(stats)
+
+    """
+    ${PYTHON3} $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
+    """
+}
