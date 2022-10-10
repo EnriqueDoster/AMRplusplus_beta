@@ -5,6 +5,7 @@ p_trunc_len_r = params.p_trunc_len_r
 
 process Qiime2Import {
     tag { }
+    label "qiime"
 
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
@@ -26,6 +27,7 @@ process Qiime2Import {
 
 process Qiime2Dada2 {
     tag { }
+    label "qiime"
 
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
@@ -46,7 +48,7 @@ process Qiime2Dada2 {
 
 process Qiime2Classify {
     tag { }
-
+    label "qiime"
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -64,7 +66,7 @@ process Qiime2Classify {
 
 process Qiime2Filter {
     tag { }
-
+    label "qiime"
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -86,7 +88,7 @@ process Qiime2Filter {
 
 process Qiime2Tree {
     tag { }
-
+    label "qiime"
     publishDir "${params.output}/Qiime2Results/Tree", mode: "copy"
 
     input:
@@ -108,7 +110,7 @@ process Qiime2Tree {
 
 process Qiime2Export {
     tag { }
-
+    label "qiime"
     publishDir "${params.output}/Qiime2Results/Exported", mode: "copy"
 
     input:
