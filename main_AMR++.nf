@@ -21,8 +21,11 @@ Channel
 .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
 .set { fastq_files }
 
-// Load main pipeline workflows
 
+// Load null pipeline
+params.pipeline = null
+
+// Load main pipeline workflows
 include { STANDARD_AMRplusplus } from './subworkflows/AMR++_standard.nf' 
 include { FAST_AMRplusplus } from './subworkflows/AMR++_fast.nf'
 include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKraken.nf'
