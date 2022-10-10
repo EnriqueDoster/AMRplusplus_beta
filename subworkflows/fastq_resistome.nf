@@ -2,7 +2,7 @@
 include { index ; bwa_align } from '../modules/Alignment/bwa'
 
 // resistome
-include { runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies} from '../modules/Resistome/resistome'
+include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies} from '../modules/Resistome/resistome'
 
 
 workflow FASTQ_RESISTOME_WF {
