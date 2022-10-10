@@ -119,10 +119,15 @@ process Qiime2Export {
         path(filtered_table)
         path(taxonomy)
 
+    output:
+        path("table-with-taxonomy.biom"), emit: table_taxa
+        path("tree.nwk"), emit: tree_nwk
+        path("dna-sequences.fasta"), emit: dna_seqs
+
     """
-    ${QIIME} tools export --input-path filtered_rep-seqs.qza --output-path . 
+    ${QIIME} tools export --input-path filtered_rep-seqs.qza --output-path .
     ${QIIME} tools export --input-path taxonomy.qza --output-path . 
-    ${QIIME} tools export --input-path rooted-tree.qza --output-path . 
+    ${QIIME} tools export --input-path rooted-tree.qza --output-path .
     ${QIIME} tools export --input-path filtered_table.qza --output-path . 
 
     # Change out column headers in taxonomy file
