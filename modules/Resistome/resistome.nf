@@ -160,7 +160,7 @@ process plotrarefaction {
         path(rarefaction)
 
     output:
-        path("*.tsv"), emit: rarefaction
+        path("graphs/*.png"), emit: plots
 
     """
     mkdir data/
