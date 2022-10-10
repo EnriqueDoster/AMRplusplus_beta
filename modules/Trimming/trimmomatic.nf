@@ -61,6 +61,9 @@ process QCstats {
     input:
         file(stats)
 
+    output:
+        path("trimmomatic.stats"), emit: combo_trim_stats
+
     """
     ${PYTHON3} $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
     """

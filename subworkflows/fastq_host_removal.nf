@@ -10,7 +10,7 @@ workflow FASTQ_RM_HOST_WF {
     main:
         host_index(hostfasta)
         bwa_rm_contaminant_fq(hostfasta, host_index.out, read_pairs_ch )
-
+        HostRemovalStats(bwa_rm_contaminant_fq.out.host_rm_stats.collect())
     emit:
         nonhost_reads = bwa_rm_contaminant_fq.out.nonhost_reads  
 }
