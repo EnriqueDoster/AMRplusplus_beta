@@ -128,7 +128,7 @@ params {
 
 ## Selecting the correct pipeline
 
-* Pipeline options
+Main pipeline options
   * Simple demonstration 
     ```bash
     --pipeline demo
@@ -145,11 +145,11 @@ params {
     ```bash
     --pipeline standard_AMR_wKraken
     ``` 
- * 16S Microbiome analysis with qiime2 (DADA2 QC > Classification with SILVA)
+  * 16S Microbiome analysis with qiime2 (DADA2 QC > Classification with SILVA)
     ```bash
     --pipeline qiime2
     ``` 
-* pipeline fragments
+Pipeline fragments
   * Evaluate QC with multiQC
     ```bash
     --pipeline eval_qc
