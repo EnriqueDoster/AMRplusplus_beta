@@ -103,7 +103,7 @@ process HostRemovalStats {
         file(host_rm_stats)
 
     output:
-        file("host.removal.stats"), emit: combo_host_rm_stats
+        path("host.removal.stats"), emit: combo_host_rm_stats
 
     """
     ${PYTHON3} $baseDir/bin/samtools_idxstats.py -i ${stats} -o host.removal.stats
