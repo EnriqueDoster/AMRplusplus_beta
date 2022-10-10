@@ -1,5 +1,5 @@
 // Load modules
-include { runqc | QCstats } from '../modules/Trimming/trimmomatic'
+include { runqc ; QCstats } from '../modules/Trimming/trimmomatic'
 
 // WC trimming
 workflow FASTQ_TRIM_WF {

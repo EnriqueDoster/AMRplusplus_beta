@@ -64,7 +64,7 @@ process bwa_align {
 process bwa_rm_contaminant_fq {
     tag { pair_id }
 
-    publishDir "${params.output}/AlignReadsToHost", mode: "copy"
+    publishDir "${params.output}/NonHostReads", mode: "copy"
 
     input:
     path hostfasta
@@ -73,6 +73,7 @@ process bwa_rm_contaminant_fq {
 
     output:
     tuple val(pair_id), path("${pair_id}.non.host.R*.fastq.gz"), emit: nonhost_reads
+    path("${pair_id}.samtools.idxstats"), emit: host_rm_stats
     
     """
     ${BWA} mem ${hostfasta} ${reads[0]} ${reads[1]} -t ${threads} > ${pair_id}.host.sam
@@ -88,5 +89,23 @@ process bwa_rm_contaminant_fq {
 
     """
 
+}
 
+process HostRemovalStats {
+    tag { sample_id }
+
+    publishDir "${params.output}/NonHostReads", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf(".stats") > 0) "HostRemovalStats/$filename"
+        }
+
+    input:
+        file(host_rm_stats)
+
+    output:
+        file("host.removal.stats")
+
+    """
+    ${PYTHON3} $baseDir/bin/samtools_idxstats.py -i ${stats} -o host.removal.stats
+    """
 }
