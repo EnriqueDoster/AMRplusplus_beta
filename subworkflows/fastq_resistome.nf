@@ -43,6 +43,7 @@ workflow FASTQ_RESISTOME_WF {
            }
             resistomeresults(runresistome.out.resistome_counts.collect())
             runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
+            plotrarefaction(runrarefaction.out.rarefaction.collect())
         }
 
 
