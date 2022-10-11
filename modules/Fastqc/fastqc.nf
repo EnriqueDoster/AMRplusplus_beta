@@ -2,6 +2,7 @@
 
 process fastqc {
     tag "FASTQC on $sample_id"
+    label "fastqc"
 
     publishDir "${params.output}/fastQC", mode: 'copy'
 
@@ -22,7 +23,7 @@ process fastqc {
 
 process multiqc {
     errorStrategy 'ignore'
-
+    label "fastqc"
 
     publishDir "${params.output}/multiQC", mode: 'copy'
 

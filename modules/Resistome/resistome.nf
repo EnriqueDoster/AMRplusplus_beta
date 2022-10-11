@@ -14,6 +14,8 @@ samples = params.samples
 
 process build_dependencies {
     tag { dl_github }
+    label "python"
+
     publishDir "${baseDir}/bin/", mode: "copy"
 
     output:
@@ -56,6 +58,7 @@ process build_dependencies {
 
 process runresistome {
     tag { sample_id }
+    label "python"
 
     publishDir "${params.output}/RunResistome", mode: "copy"
 
@@ -86,6 +89,7 @@ process runresistome {
 
 process runsnp {
     tag { sample_id }
+    label "python"
 
     publishDir "${params.output}/RunSNP_Verification", mode: "copy"
 
@@ -105,6 +109,7 @@ process runsnp {
 
 process resistomeresults {
     tag { }
+    label "python"
 
     publishDir "${params.output}/ResistomeResults", mode: "copy"
 
@@ -121,6 +126,7 @@ process resistomeresults {
 
 process runrarefaction {
     tag { sample_id }
+    label "python"
 
     publishDir "${params.output}/RunRarefaction", mode: "copy"
 
@@ -153,7 +159,8 @@ process runrarefaction {
 
 process plotrarefaction {
     tag { sample_id }
-
+    label "python"
+    
     publishDir "${params.output}/RarefactionFigures", mode: "copy"
 
     input:

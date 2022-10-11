@@ -18,6 +18,7 @@ minlen = params.minlen
 
 process runqc {
     tag { sample_id }
+    label "trimming"
 
     publishDir "${params.output}/RunQC", mode: 'copy', pattern: '*.fastq.gz',
         saveAs: { filename ->
@@ -51,6 +52,7 @@ process runqc {
 
 process QCstats {
     tag { sample_id }
+    label "python"
 
     publishDir "${params.output}/RunQC", mode: 'copy',
         saveAs: { filename ->

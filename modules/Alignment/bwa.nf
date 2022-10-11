@@ -15,7 +15,7 @@ if( params.annotation ) {
 threads = params.threads
 
 process index {
-    //tag "$referenceindex.simpleName"
+    label "alignment"
     publishDir "${params.output}/BuildBWAIndex", mode: "copy"
 
     input:
@@ -34,6 +34,7 @@ process index {
 
 process bwa_align {
     tag "$pair_id"
+    label "alignment"
     publishDir "${params.output}/AlignToDB", mode: "copy"
 
     input:
@@ -63,7 +64,7 @@ process bwa_align {
 
 process bwa_rm_contaminant_fq {
     tag { pair_id }
-
+    label "alignment"
     publishDir "${params.output}/NonHostReads", mode: "copy"
 
     input:
@@ -93,7 +94,7 @@ process bwa_rm_contaminant_fq {
 
 process HostRemovalStats {
     tag { sample_id }
-
+    label "alignment"
     publishDir "${params.output}/NonHostReads", mode: "copy",
         saveAs: { filename ->
             if(filename.indexOf(".stats") > 0) "HostRemovalStats/$filename"

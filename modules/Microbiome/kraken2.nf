@@ -3,6 +3,7 @@ params.readlen = 150
 
 process runkraken {
     tag { sample_id }
+    label "microbiome"
 
     publishDir "${params.output}/RunKraken", mode: 'copy',
         saveAs: { filename ->
@@ -39,7 +40,7 @@ process runkraken {
 
 process krakenresults {
     tag { }
-    conda = "$baseDir/envs/microbiome.yaml"
+    label "python"
 
     input:
         path(kraken_reports)
@@ -53,7 +54,7 @@ process krakenresults {
 }
 
 process runbracken {
-
+    label "microbiome"
     input:
        tuple val(sample_id), path(krakenout)
        tuple val(sample_id), path(krakenout_filtered)
@@ -77,6 +78,7 @@ process runbracken {
 }
 
 process kronadb {
+    label "microbiome"
     output:
         file("krona_db/taxonomy.tab") optional true into krona_db_ch // is this a value ch?
 
@@ -91,7 +93,7 @@ process kronadb {
 
 process kronafromkraken {
     publishDir params.outdir, mode: 'copy'
-
+    label "microbiome"
     input:
         file(x) from kraken2krona_ch.collect()
         //file(y) from kaiju2krona_ch.collect()
