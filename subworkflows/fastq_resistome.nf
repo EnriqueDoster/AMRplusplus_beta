@@ -24,7 +24,7 @@ workflow FASTQ_RESISTOME_WF {
             bwa_align(amr, index.out, read_pairs_ch )
             runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
             if (params.snp == "Y") {
-                runsnp(bwa_align.out.bwa_sam.collect(), amrsnp, resistomeresults.out.raw_count_matrix)
+                runsnp(bwa_align.out.bwa_sam, amrsnp, resistomeresults.out.snp_count_matrix)
            }
             runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
             plotrarefaction(runrarefaction.out.rarefaction.collect())
@@ -40,7 +40,7 @@ workflow FASTQ_RESISTOME_WF {
             runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
             resistomeresults(runresistome.out.resistome_counts.collect())
             if (params.snp == "Y") {
-                runsnp(bwa_align.out.bwa_sam.collect(), amrsnp, resistomeresults.out.raw_count_matrix) 
+                runsnp(bwa_align.out.bwa_sam, amrsnp, resistomeresults.out.snp_count_matrix) 
            }
             runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
             plotrarefaction(runrarefaction.out.rarefaction.collect())

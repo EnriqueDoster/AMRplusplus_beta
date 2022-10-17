@@ -87,8 +87,9 @@ process runresistome {
     """
 }
 
+
 process runsnp {
-    tag { sample_id }
+    tag {sample_id}
     label "python"
 
     publishDir "${params.output}/RunSNP_Verification", mode: "copy"
@@ -96,22 +97,52 @@ process runsnp {
     errorStrategy = 'ignore'
 
     input:
-        path(sam_resistomes)
+        tuple val(sample_id), path(sam_resistome)
         path(amrsnp)
-        path(raw_count_matrix)
+        path(snp_count_matrix)
 
     output:
-        tuple val(sample_id), path("${sample_id}_SNPs/*"), emit: snps
+        path("${sample_ID}_SNP_count_col"), emit: snp_counts
 
     """
+    mv ${sam_resistome} AmrPlusPlus_SNP/
+    mv ${snp_count_matrix} AmrPlusPlus_SNP/
     cd AmrPlusPlus_SNP/
-    for sam in ${sam_resistomes}
-    do
-        python3 SNP_Verification.py -c config.ini -a -i ${sam} -o ${sam}_SNPs --count_matrix ${raw_count_matrix_snp}
-    done
+    python3 SNP_Verification.py -c config.ini -a -i ${sam_resistome} -o ${sample_id}_SNPs --count_matrix ${snp_count_matrix}
+
+    awk -v RS=',' "/${sample_ID}/{print NR; exit}" ${snp_count_matrix}
+    col_num=$(awk -v RS=',' "/${sample_ID}/{print NR; exit}" ${snp_count_matrix})
+    cut -d ',' -f $col_num ${snp_count_matrix} > ${sample_ID}_SNP_count_col
 
     """
 }
+
+
+process snpresults {
+    tag {sample_id}
+    label "python"
+
+    publishDir "${params.output}/RunSNP_Verification", mode: "copy"
+
+    errorStrategy = 'ignore'
+
+    input:
+        path(snp_counts)
+        path(snp_count_matrix)
+
+    output:
+        path("SNPconfirmed_AMR_analytic_matrix.csv"), emit: snp_matrix
+
+    """
+
+    cut -d ',' -f 1 ${snp_count_matrix} > gene_accession_labels
+    paste gene_accession_labels ${snp_counts} > SNPconfirmed_AMR_analytic_matrix.csv
+
+
+    """
+}
+
+
 
 process resistomeresults {
     tag { }
@@ -124,6 +155,7 @@ process resistomeresults {
 
     output:
         path("AMR_analytic_matrix.csv"), emit: raw_count_matrix
+        path("AMR_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
 
     """
     ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o AMR_analytic_matrix.csv
