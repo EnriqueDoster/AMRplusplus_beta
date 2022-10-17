@@ -96,14 +96,20 @@ process runsnp {
     errorStrategy = 'ignore'
 
     input:
-        tuple val(sample_id), path(sam)
+        path(sam_resistomes)
         path(amrsnp)
+        path(raw_count_matrix)
 
     output:
         tuple val(sample_id), path("${sample_id}_SNPs/*"), emit: snps
 
     """
-    python3 $amrsnp/SNP_Verification.py -i ${sam} -o ${sample_id}_SNPs
+    cd AmrPlusPlus_SNP/
+    for sam in ${sam_resistomes}
+    do
+        python3 SNP_Verification.py -c config.ini -a -i ${sam} -o ${sam}_SNPs --count_matrix ${raw_count_matrix_snp}
+    done
+
     """
 }
 
@@ -160,7 +166,7 @@ process runrarefaction {
 process plotrarefaction {
     tag { sample_id }
     label "python"
-    
+
     publishDir "${params.output}/RarefactionFigures", mode: "copy"
 
     input:

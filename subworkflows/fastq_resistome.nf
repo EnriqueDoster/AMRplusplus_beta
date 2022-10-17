@@ -24,10 +24,10 @@ workflow FASTQ_RESISTOME_WF {
             bwa_align(amr, index.out, read_pairs_ch )
             runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
             if (params.snp == "Y") {
-                runsnp(bwa_align.out.bwa_sam, amrsnp )
+                runsnp(bwa_align.out.bwa_sam.collect(), amrsnp, resistomeresults.out.raw_count_matrix)
            }
-            resistomeresults(runresistome.out.resistome_counts.collect())
             runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
+            plotrarefaction(runrarefaction.out.rarefaction.collect())
         }
         else {
             amrsnp = file("${baseDir}/bin/AmrPlusPlus_SNP/")
@@ -38,10 +38,10 @@ workflow FASTQ_RESISTOME_WF {
             // AMR alignment
             bwa_align(amr, index.out, read_pairs_ch )
             runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
-            if (params.snp == "Y") {
-                runsnp(bwa_align.out.bwa_sam, amrsnp )
-           }
             resistomeresults(runresistome.out.resistome_counts.collect())
+            if (params.snp == "Y") {
+                runsnp(bwa_align.out.bwa_sam.collect(), amrsnp, resistomeresults.out.raw_count_matrix) 
+           }
             runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
             plotrarefaction(runrarefaction.out.rarefaction.collect())
         }
