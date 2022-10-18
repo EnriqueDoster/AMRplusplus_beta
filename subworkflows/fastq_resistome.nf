@@ -17,7 +17,6 @@ workflow FASTQ_RESISTOME_WF {
             build_dependencies()
             resistomeanalyzer = build_dependencies.out.resistomeanalyzer
             rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
-            amrsnp = build_dependencies.out.amrsnp
             // Index
             index(amr)
             // AMR alignment
@@ -25,8 +24,8 @@ workflow FASTQ_RESISTOME_WF {
             runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
             resistomeresults(runresistome.out.resistome_counts.collect())
             if (params.snp == "Y") {
-                runsnp(bwa_align.out.bwa_sam, amrsnp, resistomeresults.out.snp_count_matrix)
-                snpresults(runsnp.out.snp_counts.collect, resistomeresults.out.snp_count_matrix )
+                runsnp(bwa_align.out.bwa_sam, resistomeresults.out.snp_count_matrix)
+                snpresults(runsnp.out.snp_counts.collect(), resistomeresults.out.snp_count_matrix )
            }
             runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
             plotrarefaction(runrarefaction.out.rarefaction.collect())
@@ -42,8 +41,8 @@ workflow FASTQ_RESISTOME_WF {
             runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
             resistomeresults(runresistome.out.resistome_counts.collect())
             if (params.snp == "Y") {
-                runsnp(bwa_align.out.bwa_sam, amrsnp, resistomeresults.out.snp_count_matrix) 
-                snpresults(runsnp.out.snp_counts.collect, resistomeresults.out.snp_count_matrix )
+                runsnp(bwa_align.out.bwa_sam, resistomeresults.out.snp_count_matrix) 
+                snpresults(runsnp.out.snp_counts.collect(), resistomeresults.out.snp_count_matrix )
            }
             runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
             plotrarefaction(runrarefaction.out.rarefaction.collect())

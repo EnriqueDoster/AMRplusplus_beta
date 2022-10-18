@@ -98,16 +98,12 @@ process runsnp {
 
     input:
         tuple val(sample_id), path(sam_resistome)
-        path(amrsnp)
         path(snp_count_matrix)
 
     output:
-        path("AmrPlusPlus_SNP/${sample_id}_SNP_count_col"), emit: snp_counts
+        path("${sample_id}_SNP_count_col"), emit: snp_counts
 
     """
-    mv ${sam_resistome} AmrPlusPlus_SNP/
-    mv ${snp_count_matrix} AmrPlusPlus_SNP/
-    cd AmrPlusPlus_SNP/
     python3 SNP_Verification.py -c config.ini -a -i ${sam_resistome} -o ${sample_id}_SNPs --count_matrix ${snp_count_matrix}
 
     cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}_SNP_count_col
