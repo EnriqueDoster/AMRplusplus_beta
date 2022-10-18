@@ -102,7 +102,7 @@ process runsnp {
         path(snp_count_matrix)
 
     output:
-        path("${sample_ID}_SNP_count_col"), emit: snp_counts
+        path("AmrPlusPlus_SNP/${sample_id}_SNP_count_col"), emit: snp_counts
 
     """
     mv ${sam_resistome} AmrPlusPlus_SNP/
@@ -110,9 +110,7 @@ process runsnp {
     cd AmrPlusPlus_SNP/
     python3 SNP_Verification.py -c config.ini -a -i ${sam_resistome} -o ${sample_id}_SNPs --count_matrix ${snp_count_matrix}
 
-    awk -v RS=',' "/${sample_ID}/{print NR; exit}" ${snp_count_matrix}
-    col_num=$(awk -v RS=',' "/${sample_ID}/{print NR; exit}" ${snp_count_matrix})
-    cut -d ',' -f $col_num ${snp_count_matrix} > ${sample_ID}_SNP_count_col
+    cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}_SNP_count_col
 
     """
 }
@@ -122,7 +120,7 @@ process snpresults {
     tag {sample_id}
     label "python"
 
-    publishDir "${params.output}/RunSNP_Verification", mode: "copy"
+    publishDir "${params.output}/ResistomeResults", mode: "copy"
 
     errorStrategy = 'ignore'
 

@@ -2,7 +2,7 @@
 include { index ; bwa_align } from '../modules/Alignment/bwa'
 
 // resistome
-include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies} from '../modules/Resistome/resistome'
+include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
 
 
 workflow FASTQ_RESISTOME_WF {
@@ -23,8 +23,10 @@ workflow FASTQ_RESISTOME_WF {
             // AMR alignment
             bwa_align(amr, index.out, read_pairs_ch )
             runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
+            resistomeresults(runresistome.out.resistome_counts.collect())
             if (params.snp == "Y") {
                 runsnp(bwa_align.out.bwa_sam, amrsnp, resistomeresults.out.snp_count_matrix)
+                snpresults(runsnp.out.snp_counts.collect, resistomeresults.out.snp_count_matrix )
            }
             runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
             plotrarefaction(runrarefaction.out.rarefaction.collect())
