@@ -5,12 +5,12 @@ process runkraken {
     tag { sample_id }
     label "microbiome"
 
-    publishDir "${params.output}/RunKraken", mode: 'copy',
+    publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
         saveAs: { filename ->
-            if(filename.indexOf(".kraken.raw") > 0) "Standard/$filename"
-            else if(filename.indexOf(".kraken.report") > 0) "Standard_report/$filename"
-            else if(filename.indexOf(".kraken.filtered.report") > 0) "Filtered_report/$filename"
-            else if(filename.indexOf(".kraken.filtered.raw") > 0) "Filtered/$filename"
+            if(filename.indexOf(".kraken.raw") > 0) "Kraken/standard/$filename"
+            else if(filename.indexOf(".kraken.report") > 0) "Kraken/standard_report/$filename"
+            else if(filename.indexOf(".kraken.filtered.report") > 0) "Kraken/filtered_report/$filename"
+            else if(filename.indexOf(".kraken.filtered.raw") > 0) "Kraken/filtered/$filename"
             else {}
         }
 
@@ -41,6 +41,8 @@ process runkraken {
 process krakenresults {
     tag { }
     label "python"
+
+    publishDir "${params.output}/Results/", mode: 'copy'
 
     input:
         path(kraken_reports)

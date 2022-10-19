@@ -20,7 +20,7 @@ process runqc {
     tag { sample_id }
     label "trimming"
 
-    publishDir "${params.output}/RunQC", mode: 'copy', pattern: '*.fastq.gz',
+    publishDir "${params.output}/QC_trimming", mode: 'copy', pattern: '*.fastq.gz',
         saveAs: { filename ->
             if(filename.indexOf("P.fastq.gz") > 0) "Paired/$filename"
             else if(filename.indexOf("U.fastq.gz") > 0) "Unpaired/$filename"
@@ -54,7 +54,7 @@ process QCstats {
     tag { sample_id }
     label "python"
 
-    publishDir "${params.output}/RunQC", mode: 'copy',
+    publishDir "${params.output}/Results", mode: 'copy',
         saveAs: { filename ->
             if(filename.indexOf(".stats") > 0) "Stats/$filename"
             else {}

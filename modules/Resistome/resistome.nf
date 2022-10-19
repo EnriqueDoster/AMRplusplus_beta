@@ -13,7 +13,7 @@ skip = params.skip
 samples = params.samples
 
 process build_dependencies {
-    tag { dl_github }
+    tag { dl_dependencies }
     label "python"
 
     publishDir "${baseDir}/bin/", mode: "copy"
@@ -45,6 +45,7 @@ process build_dependencies {
     cp $baseDir/bin/resistome .
 
     git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git
+    chmod -R 777 AmrPlusPlus_SNP/
 
     """
 
@@ -52,15 +53,14 @@ process build_dependencies {
 }
 
 
-
-
-
-
 process runresistome {
     tag { sample_id }
     label "python"
 
-    publishDir "${params.output}/RunResistome", mode: "copy"
+    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf(".tsv") > 0) "ResistomeCounts/$filename"
+            else {}
 
     input:
         tuple val(sample_id), path(sam)
@@ -92,18 +92,24 @@ process runsnp {
     tag {sample_id}
     label "python"
 
-    publishDir "${params.output}/RunSNP_Verification", mode: "copy"
+    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf("_SNP_count_col") > 0) "SNP_verification/$filename"
+            else {}
 
     errorStrategy = 'ignore'
 
     input:
         tuple val(sample_id), path(sam_resistome)
         path(snp_count_matrix)
+        file(amrsnp)
 
     output:
         path("${sample_id}_SNP_count_col"), emit: snp_counts
 
     """
+    cp -r ${amrsnp}/* .
+    
     python3 SNP_Verification.py -c config.ini -a -i ${sam_resistome} -o ${sample_id}_SNPs --count_matrix ${snp_count_matrix}
 
     cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}_SNP_count_col
@@ -116,7 +122,7 @@ process snpresults {
     tag {sample_id}
     label "python"
 
-    publishDir "${params.output}/ResistomeResults", mode: "copy"
+    publishDir "${params.output}/Results", mode: "copy"
 
     errorStrategy = 'ignore'
 
@@ -142,7 +148,7 @@ process resistomeresults {
     tag { }
     label "python"
 
-    publishDir "${params.output}/ResistomeResults", mode: "copy"
+    publishDir "${params.output}/Results", mode: "copy"
 
     input:
         path(resistomes)
@@ -160,7 +166,10 @@ process runrarefaction {
     tag { sample_id }
     label "python"
 
-    publishDir "${params.output}/RunRarefaction", mode: "copy"
+    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf(".tsv") > 0) "Rarefaction/Counts/$filename"
+            else {}
 
     input:
         tuple val(sample_id), path(sam)
@@ -193,7 +202,11 @@ process plotrarefaction {
     tag { sample_id }
     label "python"
 
-    publishDir "${params.output}/RarefactionFigures", mode: "copy"
+    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf("graphs/*.png") > 0) "Rarefaction/Figures/$filename"
+            else {}
+
 
     input:
         path(rarefaction)

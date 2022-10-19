@@ -4,7 +4,7 @@ process fastqc {
     tag "FASTQC on $sample_id"
     label "fastqc"
 
-    publishDir "${params.output}/fastQC", mode: 'copy'
+    publishDir "${params.output}/QC_analysis/FastQC", mode: 'copy'
 
     input:
     tuple val(sample_id), path(reads) 
@@ -25,7 +25,10 @@ process multiqc {
     errorStrategy 'ignore'
     label "fastqc"
 
-    publishDir "${params.output}/multiQC", mode: 'copy'
+    publishDir "${params.output}/QC_analysis/", mode: 'copy',
+        saveAs: { filename ->
+            if(filename.indexOf("general_stats.txt") > 0) "${params.output}/Results/Stats/$filename"
+            else {}
 
     
     input:
@@ -34,11 +37,12 @@ process multiqc {
 
     output:
     path 'multiqc_report.html'
-    path 'multiqc_data/multiqc_general_stats.txt'
+    path 'multiqc_general_stats.txt'
 
     script:
     """
     cp $config/* .
     multiqc -v .
+    mv multiqc_data/multiqc_general_stats.txt .
     """
 }
