@@ -29,7 +29,7 @@ process multiqc {
         saveAs: { filename ->
             if(filename.indexOf("general_stats.txt") > 0) "${params.output}/Results/Stats/$filename"
             else {}
-
+        }
     
     input:
     path 'data*/*' 

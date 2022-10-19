@@ -61,6 +61,7 @@ process runresistome {
         saveAs: { filename ->
             if(filename.indexOf(".tsv") > 0) "ResistomeCounts/$filename"
             else {}
+        }
 
     input:
         tuple val(sample_id), path(sam)
@@ -96,6 +97,7 @@ process runsnp {
         saveAs: { filename ->
             if(filename.indexOf("_SNP_count_col") > 0) "SNP_verification/$filename"
             else {}
+        }
 
     errorStrategy = 'ignore'
 
@@ -170,6 +172,7 @@ process runrarefaction {
         saveAs: { filename ->
             if(filename.indexOf(".tsv") > 0) "Rarefaction/Counts/$filename"
             else {}
+        }
 
     input:
         tuple val(sample_id), path(sam)
@@ -206,7 +209,7 @@ process plotrarefaction {
         saveAs: { filename ->
             if(filename.indexOf("graphs/*.png") > 0) "Rarefaction/Figures/$filename"
             else {}
-
+        }
 
     input:
         path(rarefaction)
