@@ -4,6 +4,8 @@ include { index ; bwa_align } from '../modules/Alignment/bwa'
 // resistome
 include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
 
+// dedup resistome
+include { runresistome as dedup_runresistome ; runsnp as dedup_runsnp; resistomeresults as dedup_resistomeresults ; snpresults as dedup_snpresults} from '../modules/Resistome/resistome'
 
 workflow FASTQ_RESISTOME_WF {
     take: 
@@ -28,7 +30,7 @@ workflow FASTQ_RESISTOME_WF {
         index(amr)
         // AMR alignment
         bwa_align(amr, index.out, read_pairs_ch )
-        // Split sections below for standard and deduped results
+        // Split sections below for standard and dedup_ed results
         runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
         resistomeresults(runresistome.out.resistome_counts.collect())
         runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
@@ -41,11 +43,11 @@ workflow FASTQ_RESISTOME_WF {
         // Add analysis of deduped counts
         if (params.deduped == "Y")
             prefix = "dedup_AMR"
-            runresistome(bwa_align.out.bwa_dedup_sam,amr, annotation, resistomeanalyzer )
-            resistomeresults(runresistome.out.resistome_counts.collect())
+            dedup_runresistome(bwa_align.out.bwa_dedup_sam,amr, annotation, resistomeanalyzer )
+            dedup_resistomeresults(dedup_runresistome.out.resistome_counts.collect())
             if (params.snp == "Y") {
-                runsnp(bwa_align.out.bwa_dedup_sam, resistomeresults.out.snp_count_matrix,amrsnp) 
-                snpresults(runsnp.out.snp_counts.collect(), resistomeresults.out.snp_count_matrix )
+                dedup_runsnp(bwa_align.out.bwa_dedup_sam, dedup_resistomeresults.out.snp_count_matrix, amrsnp) 
+                dedup_snpresults(dedup_runsnp.out.snp_counts.collect(), dedup_resistomeresults.out.snp_count_matrix )
             }
         }
 
