@@ -5,7 +5,7 @@ include { index ; bwa_align } from '../modules/Alignment/bwa'
 include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
 
 // dedup resistome
-include { runresistome as dedup_runresistome ; runsnp as dedup_runsnp; resistomeresults as dedup_resistomeresults ; snpresults as dedup_snpresults} from '../modules/Resistome/resistome'
+include { runresistome as dedup_runresistome ; runsnp as dedup_runsnp; resistomeresults as dedup_resistomeresults ; snpresults as dedup_snpresults} from '../modules/Resistome/resistome' addParams(prefix: 'dedup_AMR')
 
 workflow FASTQ_RESISTOME_WF {
     take: 
@@ -22,7 +22,7 @@ workflow FASTQ_RESISTOME_WF {
             amrsnp =  build_dependencies.out.amrsnp
         }
         else {
-            amrsnp = file("${baseDir}/bin/AmrPlusPlus_SNP/")
+            amrsnp = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
             resistomeanalyzer = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
         }
@@ -37,18 +37,18 @@ workflow FASTQ_RESISTOME_WF {
         plotrarefaction(runrarefaction.out.rarefaction.collect())
         // Add SNP confirmation
         if (params.snp == "Y") {
-            runsnp(bwa_align.out.bwa_sam, resistomeresults.out.snp_count_matrix, amrsnp)
+            runsnp(bwa_align.out.bwa_sam, resistomeresults.out.snp_count_matrix)
             snpresults(runsnp.out.snp_counts.collect(), resistomeresults.out.snp_count_matrix )
         }
         // Add analysis of deduped counts
-        if (params.deduped == "Y")
-            prefix = "dedup_AMR"
+        if (params.deduped == "Y"){
             dedup_runresistome(bwa_align.out.bwa_dedup_sam,amr, annotation, resistomeanalyzer )
             dedup_resistomeresults(dedup_runresistome.out.resistome_counts.collect())
             if (params.snp == "Y") {
-                dedup_runsnp(bwa_align.out.bwa_dedup_sam, dedup_resistomeresults.out.snp_count_matrix, amrsnp) 
+                dedup_runsnp(bwa_align.out.bwa_dedup_sam, dedup_resistomeresults.out.snp_count_matrix) 
                 dedup_snpresults(dedup_runsnp.out.snp_counts.collect(), dedup_resistomeresults.out.snp_count_matrix )
             }
         }
+}
 
 

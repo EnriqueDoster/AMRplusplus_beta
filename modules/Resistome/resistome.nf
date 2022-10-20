@@ -186,13 +186,13 @@ process runsnp {
     input:
         tuple val(sample_id), path(sam_resistome)
         path(snp_count_matrix)
-        file(amrsnp)
 
     output:
         path("${sample_id}*_count_col"), emit: snp_counts
         path("${sample_id}*_SNPs/*")
 
     """
+    cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
 
     python3 SNP_Verification.py -c config.ini -a -i ${sam_resistome} -o ${sample_id}_${prefix}_SNPs --count_matrix ${snp_count_matrix}
 

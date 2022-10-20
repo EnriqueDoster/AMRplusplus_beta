@@ -27,7 +27,9 @@ process multiqc {
 
     publishDir "${params.output}/QC_analysis/", mode: 'copy',
         saveAs: { filename ->
-            if(filename.indexOf("general_stats.txt") > 0) "${params.output}/Results/Stats/$filename"
+            if(filename.indexOf("multiqc_data/*") > 0) "MultiQC_stats/multiqc_data/$filename"
+            if(filename.indexOf("general_stats.txt") > 0) "MultiQC_stats/$filename"
+            if(filename.indexOf("_report.html") > 0) "MultiQC_stats/$filename"
             else {}
         }
     
