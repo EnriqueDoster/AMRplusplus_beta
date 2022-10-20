@@ -12,6 +12,9 @@ max = params.max
 skip = params.skip
 samples = params.samples
 
+deduped = params.deduped
+prefix = params.prefix
+
 process build_dependencies {
     tag { dl_dependencies }
     label "python"
@@ -71,7 +74,7 @@ process runresistome {
 
     output:
         tuple val(sample_id), path("${sample_id}*.tsv"), emit: resistome_tsv
-        path("${sample_id}.gene.tsv"), emit: resistome_counts
+        path("${sample_id}.${prefix}.gene.tsv"), emit: resistome_counts
 
     
     
@@ -79,72 +82,14 @@ process runresistome {
     $resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
-      -gene_fp ${sample_id}.gene.tsv \
-      -group_fp ${sample_id}.group.tsv \
-      -mech_fp ${sample_id}.mechanism.tsv \
-      -class_fp ${sample_id}.class.tsv \
-      -type_fp ${sample_id}.type.tsv \
+      -gene_fp ${sample_id}.${prefix}.gene.tsv \
+      -group_fp ${sample_id}.${prefix}.group.tsv \
+      -mech_fp ${sample_id}.${prefix}.mechanism.tsv \
+      -class_fp ${sample_id}.${prefix}.class.tsv \
+      -type_fp ${sample_id}.${prefix}.type.tsv \
       -t ${threshold}
     """
 }
-
-
-process runsnp {
-    tag {sample_id}
-    label "python"
-
-    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
-        saveAs: { filename ->
-            if(filename.indexOf("_SNP_count_col") > 0) "SNP_verification/$filename"
-            else {}
-        }
-
-    errorStrategy = 'ignore'
-
-    input:
-        tuple val(sample_id), path(sam_resistome)
-        path(snp_count_matrix)
-        file(amrsnp)
-
-    output:
-        path("${sample_id}_SNP_count_col"), emit: snp_counts
-
-    """
-    cp -r ${amrsnp}/* .
-    
-    python3 SNP_Verification.py -c config.ini -a -i ${sam_resistome} -o ${sample_id}_SNPs --count_matrix ${snp_count_matrix}
-
-    cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}_SNP_count_col
-
-    """
-}
-
-
-process snpresults {
-    tag {sample_id}
-    label "python"
-
-    publishDir "${params.output}/Results", mode: "copy"
-
-    errorStrategy = 'ignore'
-
-    input:
-        path(snp_counts)
-        path(snp_count_matrix)
-
-    output:
-        path("SNPconfirmed_AMR_analytic_matrix.csv"), emit: snp_matrix
-
-    """
-
-    cut -d ',' -f 1 ${snp_count_matrix} > gene_accession_labels
-    paste gene_accession_labels ${snp_counts} > SNPconfirmed_AMR_analytic_matrix.csv
-
-
-    """
-}
-
-
 
 process resistomeresults {
     tag { }
@@ -156,11 +101,11 @@ process resistomeresults {
         path(resistomes)
 
     output:
-        path("AMR_analytic_matrix.csv"), emit: raw_count_matrix
-        path("AMR_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
+        path("${prefix}_analytic_matrix.csv"), emit: raw_count_matrix
+        path("${prefix}_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
 
     """
-    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o AMR_analytic_matrix.csv
+    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${prefix}_analytic_matrix.csv
     """
 }
 
@@ -222,5 +167,61 @@ process plotrarefaction {
     mv *.tsv data/
     mkdir graphs/
     python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd ./graphs
+    """
+}
+
+
+process runsnp {
+    tag {sample_id}
+    label "python"
+
+    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf("_SNPs/*") > 0) "SNP_verification/$filename"
+            else {}
+        }
+
+    errorStrategy = 'ignore'
+
+    input:
+        tuple val(sample_id), path(sam_resistome)
+        path(snp_count_matrix)
+        file(amrsnp)
+
+    output:
+        path("${sample_id}*_count_col"), emit: snp_counts
+        path("${sample_id}*_SNPs/*")
+
+    """
+
+    python3 SNP_Verification.py -c config.ini -a -i ${sam_resistome} -o ${sample_id}_${prefix}_SNPs --count_matrix ${snp_count_matrix}
+
+    cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}_${prefix}_SNP_count_col
+
+    """
+}
+
+
+process snpresults {
+    tag {sample_id}
+    label "python"
+
+    publishDir "${params.output}/Results", mode: "copy"
+
+    errorStrategy = 'ignore'
+
+    input:
+        path(snp_counts)
+        path(snp_count_matrix)
+
+    output:
+        path("*_analytic_matrix.csv"), emit: snp_matrix
+
+    """
+
+    cut -d ',' -f 1 ${snp_count_matrix} > gene_accession_labels
+    paste gene_accession_labels ${snp_counts} > SNPconfirmed_${prefix}_analytic_matrix.csv
+
+
     """
 }
