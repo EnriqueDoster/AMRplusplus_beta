@@ -20,6 +20,11 @@ process runqc {
     tag { sample_id }
     label "trimming"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/QC_trimming", mode: 'copy', pattern: '*.fastq.gz',
         saveAs: { filename ->
             if(filename.indexOf("P.fastq.gz") > 0) "Paired/$filename"
@@ -53,6 +58,11 @@ process runqc {
 process QCstats {
     tag { sample_id }
     label "python"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
 
     publishDir "${params.output}/Results", mode: 'copy',
         saveAs: { filename ->

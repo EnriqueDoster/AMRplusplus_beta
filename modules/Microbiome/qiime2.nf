@@ -7,6 +7,11 @@ process Qiime2Import {
     tag { }
     label "qiime"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -29,6 +34,11 @@ process Qiime2Dada2 {
     tag { }
     label "qiime"
 
+    memory { 4.GB * task.attempt }
+    time { 2.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -49,6 +59,12 @@ process Qiime2Dada2 {
 process Qiime2Classify {
     tag { }
     label "qiime"
+
+    memory { 2.GB * task.attempt }
+    time { 2.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -67,6 +83,12 @@ process Qiime2Classify {
 process Qiime2Filter {
     tag { }
     label "qiime"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -89,6 +111,12 @@ process Qiime2Filter {
 process Qiime2Tree {
     tag { }
     label "qiime"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/Qiime2Results/Tree", mode: "copy"
 
     input:
@@ -111,6 +139,12 @@ process Qiime2Tree {
 process Qiime2Export {
     tag { }
     label "qiime"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+    
     publishDir "${params.output}/Qiime2Results/Exported", mode: "copy"
 
     input:

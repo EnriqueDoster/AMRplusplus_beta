@@ -19,6 +19,11 @@ process build_dependencies {
     tag { dl_dependencies }
     label "python"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${baseDir}/bin/", mode: "copy"
 
     output:
@@ -60,6 +65,11 @@ process runresistome {
     tag { sample_id }
     label "python"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
             if(filename.indexOf(".tsv") > 0) "ResistomeCounts/$filename"
@@ -95,6 +105,11 @@ process resistomeresults {
     tag { }
     label "python"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+    
     publishDir "${params.output}/Results", mode: "copy"
 
     input:
@@ -112,6 +127,11 @@ process resistomeresults {
 process runrarefaction {
     tag { sample_id }
     label "python"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
 
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
@@ -150,6 +170,11 @@ process plotrarefaction {
     tag { sample_id }
     label "python"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
             if(filename.indexOf("graphs/*.png") > 0) "Rarefaction/Figures/$filename"
@@ -174,6 +199,12 @@ process plotrarefaction {
 process runsnp {
     tag {sample_id}
     label "python"
+
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
 
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
@@ -206,6 +237,11 @@ process snpresults {
     tag {sample_id}
     label "python"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+    
     publishDir "${params.output}/Results", mode: "copy"
 
     errorStrategy = 'ignore'

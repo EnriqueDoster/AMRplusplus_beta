@@ -16,6 +16,12 @@ threads = params.threads
 
 process index {
     label "alignment"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/Alignment/BWA_Index", mode: "copy"
 
     input:
@@ -35,6 +41,11 @@ process index {
 process bwa_align {
     tag "$pair_id"
     label "alignment"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
 
     publishDir "${params.output}/Alignment/SAM_files", mode: "copy",
         saveAs: { filename ->
@@ -69,6 +80,12 @@ process bwa_align {
 process bwa_rm_contaminant_fq {
     tag { pair_id }
     label "alignment"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3 
+ 
     publishDir "${params.output}/HostRemoval", mode: "copy",
         saveAs: { filename ->
             if(filename.indexOf("fastq.gz") > 0) "NonHostFastq/$filename"
@@ -103,7 +120,12 @@ process bwa_rm_contaminant_fq {
 process HostRemovalStats {
     tag { sample_id }
     label "alignment"
-    
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3 
+
     publishDir "${params.output}/Results", mode: "copy",
         saveAs: { filename ->
             if(filename.indexOf(".stats") > 0) "Stats/$filename"

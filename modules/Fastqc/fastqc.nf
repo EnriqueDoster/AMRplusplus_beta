@@ -4,6 +4,11 @@ process fastqc {
     tag "FASTQC on $sample_id"
     label "fastqc"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/QC_analysis/FastQC", mode: 'copy'
 
     input:
@@ -25,6 +30,11 @@ process multiqc {
     errorStrategy 'ignore'
     label "fastqc"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+    
     publishDir "${params.output}/QC_analysis/", mode: 'copy',
         saveAs: { filename ->
             if(filename.indexOf("multiqc_data/*") > 0) "MultiQC_stats/multiqc_data/$filename"

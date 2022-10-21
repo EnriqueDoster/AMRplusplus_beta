@@ -5,6 +5,11 @@ process runkraken {
     tag { sample_id }
     label "microbiome"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
         saveAs: { filename ->
             if(filename.indexOf(".kraken.raw") > 0) "Kraken/standard/$filename"
@@ -42,6 +47,11 @@ process krakenresults {
     tag { }
     label "python"
 
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${params.output}/Results/", mode: 'copy'
 
     input:
@@ -57,6 +67,7 @@ process krakenresults {
 
 process runbracken {
     label "microbiome"
+    
     input:
        tuple val(sample_id), path(krakenout)
        tuple val(sample_id), path(krakenout_filtered)
