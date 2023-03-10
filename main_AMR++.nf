@@ -36,14 +36,22 @@ include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
 include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf' 
 include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
-include { FASTQ_QIIME2_WF } from './subworkflows/fastq_16S_qiime2.nf'
+include { FASTQ_QIIME2_WF ; FASTQ_QIIME2_DADA2_WF ; FASTQ_QIIME2_DEMUX_WF } from './subworkflows/fastq_16S_qiime2.nf'
+
+// Load BAM subworkflows
+include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
 
 
 
 workflow {
-    if (params.pipeline == null) {
+    if (params.pipeline == null || params.pipeline == "demo") {
         log.info """\
         Running a demonstration of AMR++
+        ===================================
+        To include SNP analysis, add `--snp Y` to your command.
+        ===================================        
+        To include deduplicated count analysis, add `--deduped Y` to your command. 
+        Please be aware that adding deduplicated counts will significantly increase run time and temp file storage requirements.
         ===================================
         """
         //run with demo params, use params.config
@@ -81,7 +89,7 @@ workflow {
 
         FASTQ_KRAKEN_WF( fastq_files , params.kraken_db)
     }
-    else if(params.pipeline == "qiime2") {
+    else if(params.pipeline == "qiime2_full") {
         Channel
             .fromFilePairs( params.reads, flat: true )
             .ifEmpty { exit 1, "Read pair files could not be found: ${params.reads}" }
@@ -94,11 +102,41 @@ workflow {
         
         FASTQ_QIIME2_WF( ch_manifest , params.dada2_db)
     }
+    else if(params.pipeline == "qiime2_dada2"){
+        Channel
+        .fromPath(params.demux)
+        .map { file -> [ id:file.baseName,file:file] }
+        .set {ch_demux}
+        
+        FASTQ_QIIME2_DADA2_WF( ch_demux, params.dada2_db)
+    }
+    else if(params.pipeline == "qiime2_demux"){
+        Channel
+            .fromFilePairs( params.reads, flat: true )
+            .ifEmpty { exit 1, "Read pair files could not be found: ${params.reads}" }
+            .map { name, forward, reverse -> [ forward.drop(forward.findLastIndexOf{"/"})[0], forward, reverse ] } //extract file name
+            .map { name, forward, reverse -> [ name.toString().take(name.toString().indexOf("_")), forward, reverse ] } //extract sample name
+            .map { name, forward, reverse -> [ name +","+ forward + ",forward\n" + name +","+ reverse +",reverse" ] } //prepare basic synthax
+            .flatten()
+            .collectFile(name: 'manifest.txt', newLine: true, storeDir: "${params.output}/demux", seed: "sample-id,absolute-filepath,direction")
+            .set { ch_manifest }
+        
+        FASTQ_QIIME2_DEMUX_WF( ch_manifest)
+    }
+    else if(params.pipeline == "bam_resistome"){
+        Channel
+        .fromPath(params.bam_files)
+        .map { file -> [ id:file.baseName,file:file] }
+        .set {bam_files_ch}
+        
+        BAM_RESISTOME_WF( bam_files_ch , params.amr, params.annotation )
+
+    }
     else {
             println "ERROR ################################################################"
             println "Please choose a pipeline!!!" 
             println ""
-            println "To test the pipeline, use the \"demo\" pipeline :"
+            println "To test the pipeline, use the \"demo\" pipeline or omit the pipeline flag:"
             println ""
             println "ERROR ################################################################"
             println "Exiting ..."

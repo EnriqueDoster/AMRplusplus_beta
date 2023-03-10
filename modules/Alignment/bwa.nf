@@ -14,6 +14,8 @@ if( params.annotation ) {
 }
 threads = params.threads
 
+deduped = params.deduped
+
 process index {
     label "alignment"
 
@@ -42,15 +44,15 @@ process bwa_align {
     tag "$pair_id"
     label "alignment"
 
-    memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
+    memory { 4.GB * task.attempt }
+    time { 8.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
-    publishDir "${params.output}/Alignment/SAM_files", mode: "copy",
+    publishDir "${params.output}/Alignment/BAM_files", mode: "copy",
         saveAs: { filename ->
-            if(filename.indexOf(".alignment.sam") > 0) "Standard/$filename"
-            else if(filename.indexOf(".alignment.dedup.sam") > 0) "Deduped/$filename"
+            if(filename.indexOf("_alignment_sorted.bam") > 0) "Standard/$filename"
+            else if(filename.indexOf("_alignment_dedup.bam") > 0) "Deduped/$filename"
             else {}
         }
 
@@ -60,29 +62,43 @@ process bwa_align {
         tuple val(pair_id), path(reads) 
 
     output:
-        tuple val(pair_id), path("${pair_id}.alignment.dedup.sam"), emit: bwa_dedup_sam
-        tuple val(pair_id), path("${pair_id}.alignment.sam"), emit: bwa_sam
+        tuple val(pair_id), path("${pair_id}_alignment_sorted.bam"), emit: bwa_bam
+        tuple val(pair_id), path("${pair_id}_alignment_dedup.bam"), emit: bwa_dedup_bam, optional: true
 
-    """
-     ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}.alignment.sam
-     ${SAMTOOLS} view -S -b ${pair_id}.alignment.sam > ${pair_id}.alignment.bam
-     ${SAMTOOLS} sort -n ${pair_id}.alignment.bam -o ${pair_id}.alignment.sorted.bam
-     ${SAMTOOLS} fixmate ${pair_id}.alignment.sorted.bam ${pair_id}.alignment.sorted.fix.bam
-     ${SAMTOOLS} sort ${pair_id}.alignment.sorted.fix.bam -o ${pair_id}.alignment.sorted.fix.sorted.bam
-     ${SAMTOOLS} rmdup -S ${pair_id}.alignment.sorted.fix.sorted.bam ${pair_id}.alignment.dedup.bam
-     ${SAMTOOLS} view -h -o ${pair_id}.alignment.dedup.sam ${pair_id}.alignment.dedup.bam
-     rm ${pair_id}.alignment.bam
-     rm ${pair_id}.alignment.sorted*.bam
-     rm ${pair_id}.alignment.dedup.bam
-    """
+    script:
+    if( deduped == "N")
+        """
+        ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
+        rm ${pair_id}_alignment.sam
+        ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
+        rm ${pair_id}_alignment.bam
+        """
+    else if( deduped == "Y")
+        """
+        ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
+        rm ${pair_id}_alignment.sam
+        ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
+        rm ${pair_id}_alignment.bam
+        ${SAMTOOLS} fixmate -@ ${threads} ${pair_id}_alignment_sorted.bam ${pair_id}_alignment_sorted_fix.bam
+        ${SAMTOOLS} sort -@ ${threads} ${pair_id}_alignment_sorted_fix.bam -o ${pair_id}_alignment_sorted_fix.sorted.bam
+        rm ${pair_id}_alignment_sorted_fix.bam
+        ${SAMTOOLS} rmdup -S ${pair_id}_alignment_sorted_fix.sorted.bam ${pair_id}_alignment_dedup.bam
+        rm ${pair_id}_alignment_sorted_fix.sorted.bam
+        ${SAMTOOLS} view -@ ${threads} -h -o ${pair_id}_alignment_dedup.sam ${pair_id}_alignment_dedup.bam
+        rm ${pair_id}_alignment_dedup.sam
+        """
+    else
+        error "Invalid deduplication flag --deduped: ${deduped}. Please use --deduped Y for deduplicated counts, or avoid using this flag altogether to skip this error."
 }
 
 process bwa_rm_contaminant_fq {
     tag { pair_id }
     label "alignment"
 
-    memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
+    memory { 4.GB * task.attempt }
+    time { 4.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3 
  
@@ -113,6 +129,8 @@ process bwa_rm_contaminant_fq {
       -fq ${pair_id}.non.host.R1.fastq.gz \
       -fq2 ${pair_id}.non.host.R2.fastq.gz
 
+    rm *.host.sam
+    rm *.bam
     """
 
 }
@@ -121,8 +139,8 @@ process HostRemovalStats {
     tag { sample_id }
     label "alignment"
 
-    memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
+    memory { 3.GB * task.attempt }
+    time { 2.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3 
 

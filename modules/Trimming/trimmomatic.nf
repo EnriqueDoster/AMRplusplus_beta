@@ -21,7 +21,7 @@ process runqc {
     label "trimming"
 
     memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
+    time { 5.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
